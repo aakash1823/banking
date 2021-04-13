@@ -55,7 +55,10 @@ app.post('/trans',(req,res)=>{
     var {accountno,amount,b}=req.body
     console.log(accountno)
     
-
+    sqlConnection.query(`Select acnumber from customer WHERE custid = "${b}" `,function(err,results3,field){
+        var c= results3[0].acnumber
+        console.log("hi")
+        console.log(c)
     sqlConnection.query(`UPDATE Customer SET opening_balance = opening_balance-"${amount}" WHERE custid = "${b}" `,function(err,results,field){
 
             // res.json("Success")
@@ -65,14 +68,14 @@ app.post('/trans',(req,res)=>{
                     sqlConnection.query(`UPDATE Customer SET opening_balance = opening_balance+"${amount}" WHERE acnumber = "${accountno}" `,function(err,results2,field){
                         if(results2.affectedRows=="1"){
                             var status="SUCCESS"
-                            sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${b}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
+                            sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${c}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
 
                             res.send("SUCCESS")
                             })
                         }else{
                             sqlConnection.query(`UPDATE Customer SET opening_balance = opening_balance+"${amount}" WHERE custid = "${b}" `,function(err,results,field){
                                 var status="FAILURE"
-                                sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${b}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
+                                sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${c}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
 
                                     res.send("INVALID ACCOUNT NO")
                                 })
@@ -91,7 +94,7 @@ app.post('/trans',(req,res)=>{
             })
         
     })
-    
+}) 
 })
 //Display the particular customer details
 app.get('/view/:id',(req,res)=>{
@@ -110,8 +113,9 @@ app.get('/view/:id',(req,res)=>{
     })
 })
 app.get('/history/:id',(req,res)=>{
-    
-    var query = sqlConnection.query(`Select * from transaction_process where frm_acc_no="${req.params.id}"`,function(err,results,field){
+    sqlConnection.query(`Select acnumber from customer WHERE custid = "${req.params.id}" `,function(err,results3,field){
+        var c= results3[0].acnumber
+    var query = sqlConnection.query(`Select * from transaction_process where frm_acc_no="${c}"`,function(err,results,field){
         // if (results.length == 0) {
         //     console.log(results);
         //     res.send("User Not Foundd!!");
@@ -123,6 +127,7 @@ app.get('/history/:id',(req,res)=>{
        
       
     })
+})
 })
 app.get('/selection/:id',(req,res)=>{
     
@@ -139,6 +144,68 @@ app.get('/selection/:id',(req,res)=>{
       
     })
 })
+app.get('/alltrans',(req,res)=>{
+    
+    var query = sqlConnection.query(`Select * from transaction_process`,function(err,results,field){
+        if (results.length == 0) {
+            console.log(results);
+            res.send("User Not Foundd!!");
+        }
+        else{
+            res.json(results)
+            console.log(results)
+        }
+       
+      
+    })
+})
+app.get('/newesttrans',(req,res)=>{
+    
+    var query = sqlConnection.query(`SELECT * FROM transaction_process ORDER BY id DESC`,function(err,results,field){
+        if (results.length == 0) {
+            console.log(results);
+            res.send("User Not Foundd!!");
+        }
+        else{
+            res.json(results)
+            console.log(results)
+        }
+       
+      
+    })
+})
+app.get('/success',(req,res)=>{
+    
+    var query = sqlConnection.query(`SELECT * FROM transaction_process where tran_status="SUCCESS"`,function(err,results,field){
+        if (results.length == 0) {
+            console.log(results);
+            res.send("User Not Foundd!!");
+        }
+        else{
+            res.json(results)
+            console.log(results)
+        }
+       
+      
+    })
+})
+app.get('/failure',(req,res)=>{
+    
+    var query = sqlConnection.query(`SELECT * FROM transaction_process where tran_status="FAILURE"`,function(err,results,field){
+        if (results.length == 0) {
+            console.log(results);
+            res.send("User Not Foundd!!");
+        }
+        else{
+            res.json(results)
+            console.log(results)
+        }
+       
+      
+    })
+})
+
+
 // app.get('/view/:cusid/:pass',(req,res)=>{
     
 //     var query = sqlConnection.query(`Select * from customer where custid="${req.params.cusid}" and pass="${req.params.pass}"`,function(err,results,field){
