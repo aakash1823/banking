@@ -85,7 +85,7 @@ app.post('/trans',(req,res)=>{
                 }else{
                     sqlConnection.query(`UPDATE Customer SET opening_balance = opening_balance+"${amount}" WHERE custid = "${b}" `,function(err,results,field){
                         var status="FAILURE"
-                        sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${b}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
+                        sqlConnection.query(`INSERT into transaction_process(frm_acc_no,to_acc_no,amount,tran_status) values( "${c}","${accountno}","${amount}","${status}" )`,function(err,results1,field){
 
                             res.json("FUNDS INSUFFICIENT")
                         })
@@ -147,7 +147,9 @@ app.get('/selection/:id',(req,res)=>{
 app.get('/alltrans',(req,res)=>{
     
     var query = sqlConnection.query(`Select * from transaction_process`,function(err,results,field){
-        if (results.length == 0) {
+        
+
+            if (results.length == 0) {
             console.log(results);
             res.send("User Not Foundd!!");
         }
@@ -156,7 +158,7 @@ app.get('/alltrans',(req,res)=>{
             console.log(results)
         }
        
-      
+    
     })
 })
 app.get('/newesttrans',(req,res)=>{
